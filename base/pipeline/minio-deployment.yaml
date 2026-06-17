@@ -1,0 +1,51 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio-pipeline
+  labels:
+    app: minio-pipeline
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio-pipeline
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: minio-pipeline
+    spec:
+      containers:
+      - name: minio
+        image: quay.io/minio/minio:RELEASE.2023-06-19T19-52-50Z
+        command:
+        - /bin/bash
+        - -c
+        args:
+        - minio server /data --console-address :9090
+        envFrom:
+        - secretRef:
+            name: minio-root-user
+        ports:
+        - containerPort: 9000
+          name: api
+          protocol: TCP
+        - containerPort: 9090
+          name: console
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: 200m
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /data
+          name: minio-data
+      volumes:
+      - name: minio-data
+        persistentVolumeClaim:
+          claimName: minio-pipeline

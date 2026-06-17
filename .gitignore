@@ -1,0 +1,6 @@
+.claude/
+.env
+.vscode/
+venv/
+.venv/
+

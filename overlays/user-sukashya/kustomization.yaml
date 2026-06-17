@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: user-sukashya
+resources:
+  - ../../base
+patches:
+  - target:
+      kind: DataSciencePipelinesApplication
+      name: dspa
+    patch: |
+      - op: replace
+        path: /spec/objectStorage/externalStorage/host
+        value: minio-pipeline.user-sukashya.svc.cluster.local:9000
+  - target:
+      kind: Secret
+      name: llama-stack-connection
+    patch: |
+      - op: replace
+        path: /stringData/LLAMA_STACK_CLIENT_BASE_URL
+        value: "http://lsd-genai-playground-service.user-sukashya.svc.cluster.local:8321"
+      - op: replace
+        path: /stringData/OGX_CLIENT_BASE_URL
+        value: "http://lsd-genai-playground-service.user-sukashya.svc.cluster.local:8321"
+  - target:
+      kind: Secret
+      name: aws-connection-minio-pipeline
+    patch: |
+      - op: replace
+        path: /stringData/AWS_S3_ENDPOINT
+        value: "http://minio-pipeline.user-sukashya.svc.cluster.local:9000"

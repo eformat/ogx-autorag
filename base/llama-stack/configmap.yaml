@@ -1,0 +1,150 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: llama-stack-config
+  labels:
+    opendatahub.io/dashboard: "true"
+data:
+  config.yaml: |
+    version: "2"
+    distro_name: rh
+    apis:
+    - responses
+    - datasetio
+    - files
+    - inference
+    - safety
+    - scoring
+    - tool_runtime
+    - vector_io
+    providers:
+      inference:
+      - provider_id: bge-m3-embedding
+        provider_type: remote::vllm
+        config:
+          api_token: ${env.MAAS_API_TOKEN:=fake}
+          base_url: https://maas.apps.ocp.cloud.rhai-tmm.dev/prelude-maas/bge-m3/v1
+          max_tokens: 8192
+          tls_verify: ${env.VLLM_TLS_VERIFY:=true}
+      - provider_id: qwen35-inference
+        provider_type: remote::vllm
+        config:
+          api_token: ${env.MAAS_API_TOKEN:=fake}
+          base_url: https://maas.apps.ocp.cloud.rhai-tmm.dev/prelude-maas/qwen35-9b/v1
+          max_tokens: ${env.QWEN35_MAX_TOKENS:=60000}
+          tls_verify: ${env.VLLM_TLS_VERIFY:=true}
+      - provider_id: llama4-inference
+        provider_type: remote::vllm
+        config:
+          api_token: ${env.MAAS_API_TOKEN:=fake}
+          base_url: https://maas.apps.ocp.cloud.rhai-tmm.dev/prelude-maas/llama-4-scout-17b-16e-w4a16/v1
+          max_tokens: ${env.LLAMA4_MAX_TOKENS:=400000}
+          tls_verify: ${env.VLLM_TLS_VERIFY:=true}
+      vector_io:
+      - provider_id: milvus
+        provider_type: remote::milvus
+        config:
+          uri: http://milvus-service:19530
+          token: root:password
+          consistency_level: Strong
+          persistence:
+            backend: kv_default
+            namespace: vector_io::milvus
+      responses:
+      - provider_id: builtin
+        provider_type: inline::builtin
+        config:
+          persistence:
+            agent_state:
+              backend: kv_default
+              namespace: agents
+            responses:
+              backend: sql_default
+              max_write_queue_size: 10000
+              num_writers: 4
+              table_name: responses
+      eval: []
+      files:
+      - provider_id: meta-reference-files
+        provider_type: inline::localfs
+        config:
+          metadata_store:
+            backend: sql_default
+            table_name: files_metadata
+          storage_dir: /opt/app-root/src/.llama/distributions/rh/files
+      datasetio:
+      - provider_id: huggingface
+        provider_type: remote::huggingface
+        config:
+          kvstore:
+            backend: kv_default
+            namespace: datasetio::huggingface
+      scoring:
+      - provider_id: basic
+        provider_type: inline::basic
+        config: {}
+      - provider_id: llm-as-judge
+        provider_type: inline::llm-as-judge
+        config: {}
+      tool_runtime:
+      - provider_id: file-search
+        provider_type: inline::file-search
+        config: {}
+      - provider_id: model-context-protocol
+        provider_type: remote::model-context-protocol
+        config: {}
+      safety: []
+    metadata_store:
+      type: sqlite
+      db_path: /opt/app-root/src/.llama/distributions/rh/inference_store.db
+    storage:
+      backends:
+        kv_default:
+          db_path: /opt/app-root/src/.llama/distributions/rh/kvstore.db
+          type: kv_sqlite
+        sql_default:
+          db_path: /opt/app-root/src/.llama/distributions/rh/sql_store.db
+          type: sql_sqlite
+      stores:
+        conversations:
+          backend: sql_default
+          table_name: openai_conversations
+        inference:
+          backend: sql_default
+          table_name: inference_store
+        metadata:
+          backend: kv_default
+          namespace: registry
+    vector_stores:
+      default_provider_id: milvus
+      default_embedding_model:
+        provider_id: bge-m3-embedding
+        model_id: bge-m3
+    registered_resources:
+      models:
+      - provider_id: bge-m3-embedding
+        model_id: bge-m3
+        provider_model_id: bge-m3
+        model_type: embedding
+        metadata:
+          embedding_dimension: 1024
+      - provider_id: qwen35-inference
+        model_id: qwen35-9b
+        model_type: llm
+        metadata:
+          display_name: Qwen3.5-9B
+      - provider_id: llama4-inference
+        model_id: llama-4-scout-17b-16e-w4a16
+        model_type: llm
+        metadata:
+          display_name: Llama-4-Scout-17B-16E-Instruct-W4A16
+      shields: []
+      vector_stores: []
+      datasets: []
+      scoring_fns: []
+      benchmarks: []
+      tool_groups: []
+    server:
+      port: 8321
+    telemetry:
+      enabled: false

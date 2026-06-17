@@ -1,0 +1,26 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: minio-create-pipeline-bucket
+spec:
+  template:
+    spec:
+      containers:
+      - name: mc
+        image: minio/mc:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          export MC_CONFIG_DIR=/tmp/.mc
+          until mc alias set myminio http://minio-pipeline:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD; do
+            echo "Waiting for MinIO..."
+            sleep 2
+          done
+          mc mb --ignore-existing myminio/pipeline
+        envFrom:
+        - secretRef:
+            name: minio-root-user
+      restartPolicy: OnFailure
+  backoffLimit: 4

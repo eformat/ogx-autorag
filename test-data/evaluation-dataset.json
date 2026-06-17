@@ -1,0 +1,26 @@
+[
+  {
+    "question": "Why is Israel considered a hotspot for blockchain innovation?",
+    "correct_answers": [
+      "Israel has a strong technology ecosystem with many startups focused on blockchain and cryptocurrency innovation",
+      "Israel is considered a hotspot due to its concentration of blockchain startups and technology talent"
+    ],
+    "correct_answer_document_ids": ["israel_a_hotspot_for_blockchain_innovation_feb2016_11.pdf"]
+  },
+  {
+    "question": "What are some blockchain use cases discussed in the document?",
+    "correct_answers": [
+      "Blockchain use cases include financial services, supply chain management, and digital identity",
+      "The document discusses applications of blockchain technology in various industries"
+    ],
+    "correct_answer_document_ids": ["israel_a_hotspot_for_blockchain_innovation_feb2016_11.pdf"]
+  },
+  {
+    "question": "What is blockchain technology?",
+    "correct_answers": [
+      "Blockchain is a distributed ledger technology that records transactions across multiple computers",
+      "A blockchain is a decentralized, distributed digital ledger that records transactions in a secure and transparent way"
+    ],
+    "correct_answer_document_ids": ["israel_a_hotspot_for_blockchain_innovation_feb2016_11.pdf"]
+  }
+]
